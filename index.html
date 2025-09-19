@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Socket.IO Chat Rooms</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h2>place_on_message</h2>
+    <input id="room" placeholder="room_id" />
+    <input id="user" placeholder="user_name" />
+    <button onclick="joinRoom()">Join</button>
+    <button onclick="leaveRoom()">Leave</button>
+    <br /><br />
+    <input id="message" placeholder="メッセージ" />
+    <button onclick="sendMessage()">Send</button>
+
+    <ul id="messages"></ul>
+
+    <script>
+      const socket = io("http://localhost:3000");
+
+      function joinRoom() {
+        const room = document.getElementById("room").value;
+        const user = document.getElementById("user").value;
+        socket.emit("joinRoom", { room_id: room, username: user });
+      }
+
+      function leaveRoom() {
+        socket.emit("leaveRoom"); // サーバー側の leaveRoom を呼び出す
+        document.getElementById("messages").innerHTML = "";
+      }
+
+      function sendMessage() {
+        const room = document.getElementById("room").value;
+        const text = document.getElementById("message").value;
+        socket.emit("sendMessage", { room_id: room, text });
+      }
+
+      socket.on("message", (msg) => {
+        const li = document.createElement("li");
+        li.textContent = `[${msg.user}] ${msg.text}`;
+        document.getElementById("messages").prepend(li);
+      });
+    </script>
+  </body>
+</html>
